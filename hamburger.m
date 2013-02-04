@@ -36,6 +36,20 @@ function [temp_array]  =  hamburger(nx, ny, nz, Tgrill, duration, timestep)
 
 %{
 Additional Documentation:
+
+OooooO
+oxxxxo
+oxxxxo
+oxxxxo
+oxxxxo
+0xxxx0
+######
+
+O = corner
+0 = Bottom Corner
+o = edge
+x = regular surrounded piece
+
 %}
 
 % Check starting values :
@@ -52,58 +66,112 @@ assert(duration > 0 && duration > timestep,...
 assert(timestep > 0, 'Your timestep must be positive and nonzero.');
     
 % Constants
-STFB = ; % stefan-boltzmann
-CTOKEL = 273.15; % convert c to kelvin by adding
-KELTOC = -273.15; % convert kelvin to c by adding
 
 % MIGHT NOT NEED ALL THESE. LOOK OVER EQNS
-DIFFUS = 
-COND = 
-SPECHEAT = 
-DXSQRD = 
-DENS = 
-MASS =
+COND = 0.5;
+global DIFFUS;
+DIFFUS = 1.75E-7;
+PIECE_SIZE = [ ( 0.15 ./ [nx ny] ) ( 0.01 / nz ) ];
+PIECE_SIZE_SQ = PIECE_SIZE .^ 2;
+
 
 % Populate Variables
 temp_array = zeros(nx,ny,nz+1);
 temp_array(:,:,1) = Tgrill;
+change_in_temp = zeros(nx,ny,nz+1);
+
+warned_yet = false;
 
 
-PSEUDOCODE
+%PSEUDOCODE
 
-for time
-DO MIDDLE PARTS (incl inner bottom) (triple nested forloop)
-% REMEMBER: (B)OTTOM IS CONDUCTIVE
-
-INNER SIDES
-    (T)OP
-    (F)RONT
-    B(A)CK
-    (L)EFT
-    (R)IGHT
-EDGES
-    TR
-    TL
-    TA
-    TF
-    BR %SPECIAL
-    BL %SPECIAL
-    BA %SPECIAL
-    BF %SPECIAL
-CORNERS
-    ALT
-    ART
-    FLT
-    FRT
-    ALB %SPECIAL
-    ARB %SPECIAL
-    FLB %SPECIAL
-    FRB %SPECIAL
+for time=0:timestep:duration
     
+    old = temp_array;
+
+%MIDDLE:
+
+parfor i=2:nx-1 % x
+    for j=2:ny-1 % y
+        for k=2:nz % z
+            % nz, not nz - 1, because 1 = the grill, instead of an edge
+            % piece. So while for x and y the "edge" is x = nx or y = ny,
+            % the edge for z is z = nz + 1
+            change_in_temp(i,j,k) = ...
+                ( ...
+                ( ( old(i+1,j,k) + old(i-1,j,k) - 2*old(i,j,k) ) ...
+                / PIECE_SIZE_SQ(1) ) ...
+                + ...
+                ( ( old(i,j+1,k) + old(i,j-1,k) - 2*old(i,j,k) ) ...
+                / PIECE_SIZE_SQ(2) ) ...
+                + ...
+                ( ( old(i,j,k+1) + old(i,j,k-1) - 2*old(i,j,k) ) ...
+                / PIECE_SIZE_SQ(2) ) ...
+                ) * DIFFUS;
+        end % z
+    end % y
+end % x
+
+                
+
+
+
+% INNER SIDES
+%     (T)OP
+%     (F)RONT
+%     B(A)CK
+%     (L)EFT
+%     (R)IGHT
+% EDGES
+%     TR
+%     TL
+%     TA
+%     TF
+%     BR %SPECIAL
+%     BL %SPECIAL
+%     BA %SPECIAL
+%     BF %SPECIAL
+% CORNERS
+%     ALT
+%     ART
+%     FLT
+%     FRT
+%     ALB %SPECIAL
+%     ARB %SPECIAL
+%     FLB %SPECIAL
+%     FRB %SPECIAL
     
-end %for
+if (~warned_yet) && abs(max(change_in_temp)) > Tgrill
+        warning('VALUES ARE BLOWING UP');
+        warned_yet = true;
+end
+
+temp_array = temp_array + change_in_temp;
+
+    
+end % time
 
 
 
 
-end % function
+end % main hamburger function
+
+function [qpera] = radiate(Tint)
+
+STFB = 5.60E-8; % stefan-boltzmann
+CTOKEL = 273.15; %C to kelvin by adding. Kelvin to C by subtracting.
+TEXT = 20 + CTOKEL;
+Tint = Tint + CTOKEL;
+
+qpera = (TEXT^4 - Tint^4) * STFB;
+
+
+end % radiate function
+
+function [q] = spatial_heat_flow(Tcurr, Tcomp, distance)
+DENS = 950;
+SPECHEAT = 3000;
+global DIFFUS;
+
+q = - DIFFUS * DENS * SPECHEAT * ( (Tcurr-Tcomp) / distance ) ;
+end % spatial heat flow function
