@@ -122,7 +122,7 @@ change_in_temp(2:end-1,2:end-1,2:end-1) = ...
                 
 
 
-% INNER SIDES
+%% INNER SIDES
 % For each piece, take spatial heat flow from 5 meat-touching sides, then
 % the 1 radiative flow from the exposed piece
 
@@ -162,9 +162,10 @@ end
 change_in_temp(2:end-1,2:end-1,k) = ...
     change_in_temp(2:end-1,2:end-1,k) ./ ( SPECHEAT * PIECE_MASS );
 
+% (B)OTTOM is touching grill, does not need radiative work.
 
 % (F)RONT (I fixed at end, +I exposed)
-i = size(old,2); % habit and cleaner code.
+i = size(old,1); % habit and cleaner code.
 parfor j=2:ny-1 % y
     for k=3:(size(old,3)-1) % z
         change_in_temp(i,j,k) = ...
@@ -236,7 +237,7 @@ change_in_temp(i,2:end-1,3:end-1) = ...
     change_in_temp(i,2:end-1,3:end-1) ./ ( SPECHEAT * PIECE_MASS );
 %(L)EFT (J fixed at 1, -J exposed)
 j = 1;
-parfor i=2:nx-1 % y
+parfor i=2:nx-1 % x
     for k=3:(size(old,3)-1) % z
         change_in_temp(i,j,k) = ...
             ( ... % overall heat added for segment
@@ -268,31 +269,69 @@ end
 
 change_in_temp(2:end-1,j,3:end-1) = ...
     change_in_temp(2:end-1,j,3:end-1) ./ ( SPECHEAT * PIECE_MASS );
-%     (R)IGHT (J fixed at end, +J exposed)
 
+%(R)IGHT (J fixed at end, +J exposed)
+j = size(old,2);
+parfor i=2:nx-1 % x
+    for k=3:(size(old,3)-1) % z
+        change_in_temp(i,j,k) = ...
+            ( ... % overall heat added for segment
+            ...
+            ...
+            ... % X direction
+            ( prod(PIECE_SIZE(2:3)) * ...
+            ...
+            ( spatial_heat_flow(old(i,j,k),old(i-1,j,k),PIECE_SIZE(1)) ...
+            + spatial_heat_flow(old(i,j,k),old(i+1,j,k),PIECE_SIZE(1)))...
+            )...
+            ...
+            + ... % Y dir
+            ( prod(PIECE_SIZE([1 3])) * ...
+            ...
+            ( spatial_heat_flow(old(i,j,k),old(i,j-1,k),PIECE_SIZE(2)) ...
+            + radiate(old(i,j,k)))...
+            )...
+            ...
+            + ... % Z dir (THIS ONE HAS RADIATION)
+            ( prod(PIECE_SIZE(1:2)) * ...
+            ...
+            ( spatial_heat_flow(old(i,j,k),old(i,j,k-1),PIECE_SIZE(3)) ...
+            + spatial_heat_flow(old(i,j,k),old(i,j,k+1),PIECE_SIZE(3)))...
+            )...
+            );  
+    end
+end
 
+change_in_temp(2:end-1,j,3:end-1) = ...
+    change_in_temp(2:end-1,j,3:end-1) ./ ( SPECHEAT * PIECE_MASS );
 
-% EDGES
-%     TR
-%     TL
-%     TA
-%     TF
-%     BR %SPECIAL
-%     BL %SPECIAL
-%     BA %SPECIAL
-%     BF %SPECIAL
+%% end of inner sides
+
+%% EDGES
+% TR
+
+% TL
+% TA
+% TF
+% BR %SPECIAL
+% BL %SPECIAL
+% BA %SPECIAL
+% BF %SPECIAL
 % #DIV BY HEAT CAP AND MASS
-% CORNERS
-%     ALT
-%     ART
-%     FLT
-%     FRT
-%     ALB %SPECIAL
-%     ARB %SPECIAL
-%     FLB %SPECIAL
-%     FRB %SPECIAL
+%% end of edges
+
+%% CORNERS
+% ALT
+% ART
+% FLT
+% FRT
+% ALB %SPECIAL
+% ARB %SPECIAL
+% FLB %SPECIAL
+% FRB %SPECIAL
 
 % #DIV BY HEAT CAP AND MASS
+%% end of corners
 
 
 % # MULTIPLY ALL BY TIMESTEP
