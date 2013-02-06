@@ -37,23 +37,34 @@ function [temp_array]  =  hamburger(nx, ny, nz, Tgrill, duration, timestep)
 %{
 Additional Documentation:
 
-LOOP HANDLING
+VARIABLE NAMING CONVENTIONS / COORDINATE SYSTEMS / LOOP HANDLING
 
-OooooO
-oxxxxo
-oxxxxo
-oxxxxo
-oxxxxo
-0xxxx0
-######
+    The program uses I/X, J/Y, K/Z almost interchangeably.
 
-O = corner
-0 = Bottom Corner
-o = edge
-x = regular surrounded piece
+    A right-handed coordinate system is used, with the grill existing in
+    the XY plane.
 
-VARIABLE NAMING CONVENTIONS
+    The hamburger is seen from the side of the grill, with the positive X/I
+    direction going towards the observer, the positive Y/J direction going
+    to the right of the observer, and the positive Z/K direction being
+    "up".
 
+    As seen from the side:
+
+    OooooO
+    oxxxxo
+    oxxxxo
+    oxxxxo
+    oxxxxo
+    oxxxxo
+    ######
+
+    O = corner (3 exposed sides, 3 touching)
+    o = edge (1 exposed side, 5 touching)
+    x = regular surrounded piece (no exposed sides, all 6 touching)
+
+    The program will calculate all regular surrounded pieces, then all
+    edges, then all corners.
 %}
 
 
@@ -105,7 +116,7 @@ old = temp_array;
 
 %% MIDDLE
 
-parfor i=2:nx-1 % x
+for i=2:nx-1 % x
     for j=2:ny-1 % y
         for k=2:nz % z
             % nz, not nz - 1, because 1 = the grill, instead of an edge
@@ -135,7 +146,7 @@ change_in_temp(2:end-1,2:end-1,2:end-1) = ...
 
 % (T)OP (K fixed at end/nz+1, +K is exposed)
 k = size(old,3); % habit and cleaner code.
-parfor i=2:nx-1 % x
+for i=2:nx-1 % x
     for j=2:ny-1 % y
 
         change_in_temp(i,j,k) = ...
@@ -319,7 +330,7 @@ change_in_temp(2:end-1,j,2:end-1) = ...
 % TR
 j = size(old,2);
 k = size(old,3); 
-parfor i=2:size(old,1)-1
+for i=2:size(old,1)-1
 
     change_in_temp(i,j,k) = ...
         ( ... % overall heat added for segment
@@ -355,7 +366,7 @@ change_in_temp(2:end-1,j,k) = ...
 % TL
 j = 1;
 k = size(old,3); 
-parfor i=2:size(old,1)-1
+for i=2:size(old,1)-1
 
     change_in_temp(i,j,k) = ...
         ( ... % overall heat added for segment
@@ -391,7 +402,7 @@ change_in_temp(2:end-1,j,k) = ...
 % TA
 i = 1;
 k = size(old,3); 
-parfor j=2:size(old,2)-1
+for j=2:size(old,2)-1
 
     change_in_temp(i,j,k) = ...
         ( ... % overall heat added for segment
@@ -427,7 +438,7 @@ change_in_temp(i,2:end-1,k) = ...
 % TF
 i = size(old,1);
 k = size(old,3); 
-parfor j=2:size(old,2)-1
+for j=2:size(old,2)-1
 
     change_in_temp(i,j,k) = ...
         ( ... % overall heat added for segment
@@ -463,7 +474,7 @@ change_in_temp(i,2:end-1,k) = ...
 % AR
 j = size(old,2);
 i = 1; 
-parfor k=2:size(old,3)-1
+for k=2:size(old,3)-1
 
     change_in_temp(i,j,k) = ...
         ( ... % overall heat added for segment
@@ -499,7 +510,7 @@ change_in_temp(i,j,2:end-1) = ...
 % AL
 j = 1;
 i = 1; 
-parfor k=2:size(old,3)-1
+for k=2:size(old,3)-1
 
     change_in_temp(i,j,k) = ...
         ( ... % overall heat added for segment
@@ -535,7 +546,7 @@ change_in_temp(i,j,2:end-1) = ...
 % FR
 j = size(old,2);
 i = size(old,1); 
-parfor k=2:size(old,3)-1
+for k=2:size(old,3)-1
 
     change_in_temp(i,j,k) = ...
         ( ... % overall heat added for segment
@@ -571,7 +582,7 @@ change_in_temp(i,j,2:end-1) = ...
 % FL
 j = 1;
 i = size(old,1); 
-parfor k=2:size(old,3)-1
+for k=2:size(old,3)-1
 
     change_in_temp(i,j,k) = ...
         ( ... % overall heat added for segment
@@ -602,7 +613,6 @@ end
         
 change_in_temp(i,j,2:end-1) = ...
     change_in_temp(i,j,2:end-1) ./ ( SPECHEAT * PIECE_MASS );
-
 
 %% END EDGES
 
