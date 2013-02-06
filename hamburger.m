@@ -37,6 +37,8 @@ function [temp_array]  =  hamburger(nx, ny, nz, Tgrill, duration, timestep)
 %{
 Additional Documentation:
 
+LOOP HANDLING
+
 OooooO
 oxxxxo
 oxxxxo
@@ -49,6 +51,8 @@ O = corner
 0 = Bottom Corner
 o = edge
 x = regular surrounded piece
+
+VARIABLE NAMING CONVENTIONS
 
 %}
 
@@ -65,7 +69,7 @@ assert( min([nx ny nz]) > 0 && max(rem([nx ny nz],1)) == 0,...
 % Temporal
 assert(duration >= timestep,...
     'Your duration must be greater than your timestep.');
-assert(duration > 0 && duration > timestep,...
+assert(duration > 0,...
     'Your duration must be positive and nonzero.');
 assert(timestep > 0, 'Your timestep must be positive and nonzero.');
    
@@ -95,7 +99,7 @@ warned_yet = false;
 %% END STARTUP
 
 
-for time=0:timestep:duration
+for time=0:timestep:duration-timestep
     
 old = temp_array;
 
@@ -199,8 +203,8 @@ for j=2:ny-1 % y
     end
 end
 
-change_in_temp(i,2:end-1,3:end-1) = ...
-    change_in_temp(i,2:end-1,3:end-1) ./ ( SPECHEAT * PIECE_MASS );
+change_in_temp(i,2:end-1,2:end-1) = ...
+    change_in_temp(i,2:end-1,2:end-1) ./ ( SPECHEAT * PIECE_MASS );
 
 
 %B(A)CK (I fixed at 1, -I exposed)
@@ -236,8 +240,9 @@ for j=2:ny-1 % y
     end
 end
 
-change_in_temp(i,2:end-1,3:end-1) = ...
-    change_in_temp(i,2:end-1,3:end-1) ./ ( SPECHEAT * PIECE_MASS );
+change_in_temp(i,2:end-1,2:end-1) = ...
+    change_in_temp(i,2:end-1,2:end-1) ./ ( SPECHEAT * PIECE_MASS );
+
 %(L)EFT (J fixed at 1, -J exposed)
 j = 1;
 for i=2:nx-1 % x
@@ -270,8 +275,8 @@ for i=2:nx-1 % x
     end
 end
 
-change_in_temp(2:end-1,j,3:end-1) = ...
-    change_in_temp(2:end-1,j,3:end-1) ./ ( SPECHEAT * PIECE_MASS );
+change_in_temp(2:end-1,j,2:end-1) = ...
+    change_in_temp(2:end-1,j,2:end-1) ./ ( SPECHEAT * PIECE_MASS );
 
 %(R)IGHT (J fixed at end, +J exposed)
 j = size(old,2);
@@ -305,8 +310,8 @@ for i=2:nx-1 % x
     end
 end
 
-change_in_temp(2:end-1,j,3:end-1) = ...
-    change_in_temp(2:end-1,j,3:end-1) ./ ( SPECHEAT * PIECE_MASS );
+change_in_temp(2:end-1,j,2:end-1) = ...
+    change_in_temp(2:end-1,j,2:end-1) ./ ( SPECHEAT * PIECE_MASS );
 
 %% END INNER SIDES
 
@@ -765,7 +770,7 @@ function [qpera] = radiate(Tint)
 %     qpera    The rate of heat flow per square meter (J/m^2)
 
 
-STFB = 5.60E-8; % stefan-boltzmann
+STFB = 5.67E-8; % stefan-boltzmann
 CTOKEL = 273.15; %C to kelvin by adding. Kelvin to C by subtracting.
 TEXT = 20 + CTOKEL;
 Tint = Tint + CTOKEL;
