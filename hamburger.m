@@ -153,8 +153,8 @@ for time=0:timestep:duration-timestep
 old = temp_array;
 
 %% MIDDLE
-
 % The old iterative approach can be used here; the second difference.
+
 for i=2:nx-1 % x
     for j=2:ny-1 % y
         for k=2:nz % z
@@ -178,6 +178,7 @@ change_in_temp(2:end-1,2:end-1,2:end-1) = ...
     change_in_temp(2:end-1,2:end-1,2:end-1) .* DIFFUS;
                 
 %% END MIDDLE
+
 
 %{
 For each piece after this, the loops will take the following format:
@@ -414,6 +415,7 @@ change_in_temp(2:end-1,j,2:end-1) = ...
 %% END INNER SIDES
 
 %% EDGES
+
 % TR
 j = size(old,2);
 k = size(old,3); 
@@ -704,7 +706,6 @@ change_in_temp(i,j,2:end-1) = ...
 %% END EDGES
 
 %% TOP CORNERS
-
 % These all follow a similar format to above, but since for each operation
 % all three dimensions are fixed, the constant multiplication is done
 % inline.
