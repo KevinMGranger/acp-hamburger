@@ -38,6 +38,18 @@ function [temp_array]  =  hamburger(nx, ny, nz, Tgrill, duration, timestep)
 %{
 Additional Documentation:
 
+SPLITTING BY SECTION
+
+    The rest of this program is divided with cell markers (%%)
+    This means you can easily fold the code if cell folding is on (turn it
+    on in  Preferences > Editor/Debugger > Code Folding  and check the
+    "enable" box for cells).
+    
+    It also means teh published version will be divided! Don't mind the
+    "END ____" sections, those are necessary to divide portions, but
+    anything inside those blocks aren't necessary part of whatever ending
+    it says.
+
 CALCULATIONS
     
     All calculations are done in Celcius, unless shown otherwise and
